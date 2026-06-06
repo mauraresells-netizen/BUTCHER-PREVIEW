@@ -353,16 +353,12 @@ body.locked{overflow:hidden;height:100vh;}
 .hero{
   min-height:100vh;display:flex;align-items:center;position:relative;overflow:hidden;
   padding-top:8rem;
+  /* Static gradient base (no background-position animation — repaint-free).
+     The drifting blurred shapes below provide the living motion, all on GPU. */
   background:
     radial-gradient(ellipse 80% 60% at 75% 25%,rgba(35,73,58,.12),transparent 60%),
     radial-gradient(ellipse 70% 55% at 10% 85%,rgba(189,138,54,.12),transparent 55%),
     var(--bone);
-  background-size:200% 200%,200% 200%,100% 100%;
-  animation:heroGradient 24s ease-in-out infinite alternate;   /* slow living bg */
-}
-@keyframes heroGradient{
-  0%{background-position:0% 0%,100% 100%,0 0;}
-  100%{background-position:30% 20%,70% 80%,0 0;}
 }
 .hero__shape{position:absolute;border-radius:50%;filter:blur(8px);opacity:.5;will-change:transform;pointer-events:none;}
 .hero__shape.s1{width:340px;height:340px;top:-80px;right:6%;
@@ -403,23 +399,25 @@ body.locked{overflow:hidden;height:100vh;}
   aspect-ratio:3/4;border:1px solid var(--brass);padding:11px;background:var(--cream-pure);
   box-shadow:0 30px 60px var(--shadow);
   animation:floaty 7s ease-in-out infinite;     /* gentle living float */
+  will-change:transform;
 }
 @keyframes floaty{0%,100%{transform:translateY(0) rotate(0);}50%{transform:translateY(-14px) rotate(-.5deg);}}
 .hero__photo-inner{
   width:100%;height:100%;position:relative;overflow:hidden;
-  /* ===== IMAGE SWAP POINT — hero counter shot ===== */
+  /* ===== HERO PHOTO — real cut; bottom gradient keeps the caption legible ===== */
   background:
-    linear-gradient(140deg,rgba(35,73,58,.88),rgba(20,42,32,.94)),
-    repeating-linear-gradient(45deg,rgba(255,255,255,.04) 0 14px,transparent 14px 28px);
+    linear-gradient(to top,rgba(10,24,18,.9) 0%,rgba(10,24,18,.12) 55%,rgba(10,24,18,.3) 100%),
+    url('images/hero.jpg');
   background-size:cover;background-position:center;
   display:flex;flex-direction:column;justify-content:flex-end;padding:1.6rem;
 }
-.hero__photo-inner::after{ /* slow brass shine sweep */
-  content:"";position:absolute;top:0;left:-60%;width:40%;height:100%;
+.hero__photo-inner::after{ /* slow brass shine sweep — GPU transform only (no layout) */
+  content:"";position:absolute;top:0;left:0;width:45%;height:100%;
   background:linear-gradient(105deg,transparent,rgba(220,169,79,.22),transparent);
-  transform:skewX(-18deg);animation:shine 6.5s ease-in-out infinite;
+  transform:translateX(-180%) skewX(-18deg);will-change:transform;
+  animation:shine 7s ease-in-out infinite;
 }
-@keyframes shine{0%,100%{left:-60%;}55%,70%{left:130%;}}
+@keyframes shine{0%,100%{transform:translateX(-180%) skewX(-18deg);}55%,70%{transform:translateX(320%) skewX(-18deg);}}
 .hero__photo-inner span{position:relative;z-index:2;font-family:var(--font-display);color:var(--cream-pure);font-style:italic;
   font-size:1.5rem;line-height:1.15;}
 .hero__photo-inner small{position:relative;z-index:2;font-family:var(--font-body);color:var(--brass-bright);font-size:.7rem;
@@ -429,7 +427,7 @@ body.locked{overflow:hidden;height:100vh;}
   background:var(--brass);color:var(--green-deep);display:flex;flex-direction:column;
   align-items:center;justify-content:center;text-align:center;z-index:3;
   font-family:var(--font-display);font-weight:600;box-shadow:0 14px 30px rgba(0,0,0,.22);
-  animation:badgeBob 7s ease-in-out infinite;
+  animation:badgeBob 7s ease-in-out infinite;will-change:transform;
 }
 @keyframes badgeBob{0%,100%{transform:translateY(0) rotate(-9deg);}50%{transform:translateY(-8px) rotate(-5deg);}}
 .hero__badge b{font-size:1.45rem;line-height:1;}
@@ -489,10 +487,10 @@ body.locked{overflow:hidden;height:100vh;}
 }
 .about__img{
   width:100%;height:100%;position:relative;overflow:hidden;
-  /* ===== IMAGE SWAP POINT — the family / shop interior ===== */
+  /* ===== ABOUT PHOTO — prime steaks on the butcher's block ===== */
   background:
-    linear-gradient(160deg,rgba(35,73,58,.92),rgba(20,42,32,.9)),
-    repeating-linear-gradient(0deg,rgba(255,255,255,.05) 0 2px,transparent 2px 22px);
+    linear-gradient(rgba(20,42,32,.14),rgba(20,42,32,.14)),
+    url('images/about.jpg');
   background-size:cover;background-position:center;
 }
 .about__img::after{ /* clip-path wipe reveal */
@@ -523,11 +521,10 @@ body.locked{overflow:hidden;height:100vh;}
 }
 .spotlight__bg{
   position:absolute;inset:-12% 0;z-index:0;will-change:transform;
-  /* ===== IMAGE SWAP POINT — dry-aging room / hanging beef ===== */
+  /* ===== SPOTLIGHT PHOTO — dramatic steak; strong overlay for white text ===== */
   background:
-    linear-gradient(rgba(10,24,18,.66),rgba(10,24,18,.78)),
-    radial-gradient(circle at 30% 30%,rgba(35,73,58,.6),transparent 60%),
-    linear-gradient(135deg,#1a3a2c,#0c1d15);
+    linear-gradient(rgba(10,24,18,.74),rgba(8,20,14,.85)),
+    url('images/spotlight.jpg');
   background-size:cover;background-position:center;
 }
 .spotlight__inner{position:relative;z-index:2;max-width:760px;padding:3rem;}
@@ -564,14 +561,14 @@ body.locked{overflow:hidden;height:100vh;}
 /* asymmetric spans */
 .gtile.t-wide{grid-column:span 2;}
 .gtile.t-tall{grid-row:span 2;}
-/* gradient fills per tile (placeholder imagery — green / brass / charcoal family) */
-.g1{background:linear-gradient(150deg,#2d5a47,#0f241b);}
-.g2{background:linear-gradient(150deg,#3a6e55,#1a3a2c);}
-.g3{background:linear-gradient(150deg,#dca94f,#7a5a1f);}
-.g4{background:linear-gradient(150deg,#2a2a22,#121210);}
-.g5{background:linear-gradient(150deg,#23493a,#bd8a36);}
-.g6{background:linear-gradient(150deg,#1a3a2c,#0a1812);}
-.g7{background:linear-gradient(150deg,#bd8a36,#23493a);}
+/* Real photos per tile, with a subtle dark gradient so the white captions stay legible */
+.g1{background:linear-gradient(rgba(20,42,32,.1),rgba(10,24,18,.45)),url('images/g1.jpg');background-size:cover;background-position:center;}
+.g2{background:linear-gradient(rgba(20,42,32,.1),rgba(10,24,18,.45)),url('images/g2.jpg');background-size:cover;background-position:center;}
+.g3{background:linear-gradient(rgba(20,42,32,.1),rgba(10,24,18,.45)),url('images/g3.jpg');background-size:cover;background-position:center;}
+.g4{background:linear-gradient(rgba(20,42,32,.1),rgba(10,24,18,.45)),url('images/g4.jpg');background-size:cover;background-position:center;}
+.g5{background:linear-gradient(rgba(20,42,32,.1),rgba(10,24,18,.45)),url('images/g5.jpg');background-size:cover;background-position:center;}
+.g6{background:linear-gradient(rgba(20,42,32,.1),rgba(10,24,18,.45)),url('images/g6.jpg');background-size:cover;background-position:center;}
+.g7{background:linear-gradient(rgba(20,42,32,.1),rgba(10,24,18,.45)),url('images/g7.jpg');background-size:cover;background-position:center;}
 
 /* ============================================================
    TESTIMONIALS  ·  dark rich carousel
@@ -763,9 +760,9 @@ body.locked{overflow:hidden;height:100vh;}
   <div class="splash__img" aria-hidden="true"></div>
   <div class="splash__sweep" aria-hidden="true"></div>
   <div class="splash__inner">
-    <p class="splash__eyebrow">Family Butchers · Est. 1948</p>
+    <p class="splash__eyebrow">Family Butchers &middot; Est. 1948</p>
     <h1 class="splash__title">Butcher</h1>
-    <p class="splash__desc">Duke Street · Dennistoun · Glasgow</p>
+    <p class="splash__desc">Duke Street &middot; Dennistoun &middot; Glasgow</p>
     <div class="splash__rule"></div>
     <button class="splash__cta cursor-hover" id="enterBtn"><span>Step Inside</span></button>
   </div>
@@ -801,7 +798,7 @@ body.locked{overflow:hidden;height:100vh;}
     <a href="#testi">Reviews</a>
     <a href="#find">Find Us</a>
     <a href="#order">Place an Order</a>
-    <div class="panel__foot">0141 554 2091 · Duke Street</div>
+    <div class="panel__foot">0141 554 2091 &middot; Duke Street</div>
   </div>
 
   <!-- ============ HERO ============ -->
@@ -811,7 +808,7 @@ body.locked{overflow:hidden;height:100vh;}
     <div class="hero__shape s3"></div>
     <div class="wrap hero__grid">
       <div class="hero__copy">
-        <span class="hero__status"><span class="dot"></span>Open today · til 5.30</span>
+        <span class="hero__status"><span class="dot"></span>Open today &middot; til 5.30</span>
         <p class="hero__eyebrow">Glasgow's East-End Butcher Since 1948</p>
         <h1>
           <span class="h-reveal" id="heroH1"></span><br/>
@@ -851,68 +848,68 @@ body.locked{overflow:hidden;height:100vh;}
           <span class="eyebrow">At the Counter</span>
           <h2 class="section-title">Cut Fresh, <em>Every Morning</em></h2>
         </div>
-        <p class="lede reveal">Everything's prepared in the shop — nothing pre-packed, nothing flown in. Tell us what you're cooking and we'll cut it to suit.</p>
+        <p class="lede reveal">Everything's prepared in the shop &mdash; nothing pre-packed, nothing flown in. Tell us what you're cooking and we'll cut it to suit.</p>
       </div>
 
       <div class="cuts-grid stagger" id="cutsGrid">
-        <!-- Each card: category tag · name · description · price -->
+        <!-- Each card: category tag &middot; name &middot; description &middot; price -->
         <article class="cut cursor-hover">
           <span class="cut__tag">Scotch Beef</span>
           <h3 class="cut__name">28-Day Dry-Aged Ribeye</h3>
-          <p class="cut__desc">Bone-in and hung four weeks on the rail. Deep, nutty, marbled — our most-asked-for cut.</p>
-          <div class="cut__price"><b>£32<span class="pence">.00</span></b><span>per kg</span></div>
+          <p class="cut__desc">Bone-in and hung four weeks on the rail. Deep, nutty, marbled &mdash; our most-asked-for cut.</p>
+          <div class="cut__price"><b>&pound;32<span class="pence">.00</span></b><span>per kg</span></div>
         </article>
         <article class="cut cursor-hover">
           <span class="cut__tag">Scotch Beef</span>
           <h3 class="cut__name">Aberdeen Angus Fillet</h3>
           <p class="cut__desc">The tenderest cut in the shop. Trimmed clean, ready for the pan or a special occasion.</p>
-          <div class="cut__price"><b>£46<span class="pence">.00</span></b><span>per kg</span></div>
+          <div class="cut__price"><b>&pound;46<span class="pence">.00</span></b><span>per kg</span></div>
         </article>
         <article class="cut cursor-hover">
           <span class="cut__tag">The Famous One</span>
           <h3 class="cut__name">The House Steak Pie</h3>
-          <p class="cut__desc">Shortcrust, prime stewing steak, rich gravy. A Glasgow Sunday institution — order early at Hogmanay.</p>
-          <div class="cut__price"><b>£9<span class="pence">.50</span></b><span>feeds four</span></div>
+          <p class="cut__desc">Shortcrust, prime stewing steak, rich gravy. A Glasgow Sunday institution &mdash; order early at Hogmanay.</p>
+          <div class="cut__price"><b>&pound;9<span class="pence">.50</span></b><span>feeds four</span></div>
         </article>
         <article class="cut cursor-hover">
           <span class="cut__tag">Made In-House</span>
           <h3 class="cut__name">Traditional Lorne Sausage</h3>
           <p class="cut__desc">Proper square sausage for the morning roll. Our own recipe, minced and pressed daily.</p>
-          <div class="cut__price"><b>£6<span class="pence">.80</span></b><span>per kg</span></div>
+          <div class="cut__price"><b>&pound;6<span class="pence">.80</span></b><span>per kg</span></div>
         </article>
         <article class="cut cursor-hover">
           <span class="cut__tag">Made In-House</span>
           <h3 class="cut__name">Hand-Linked Pork Sausages</h3>
           <p class="cut__desc">Free-range pork, a whisper of sage and pepper, linked by hand each morning. No rusk fillers.</p>
-          <div class="cut__price"><b>£7<span class="pence">.20</span></b><span>per kg</span></div>
+          <div class="cut__price"><b>&pound;7<span class="pence">.20</span></b><span>per kg</span></div>
         </article>
         <article class="cut cursor-hover">
           <span class="cut__tag">Breakfast</span>
           <h3 class="cut__name">Ayrshire Dry-Cure Bacon</h3>
-          <p class="cut__desc">Cured slow the traditional way — no water, no white residue in the pan. Smoked or green.</p>
-          <div class="cut__price"><b>£9<span class="pence">.80</span></b><span>per kg</span></div>
+          <p class="cut__desc">Cured slow the traditional way &mdash; no water, no white residue in the pan. Smoked or green.</p>
+          <div class="cut__price"><b>&pound;9<span class="pence">.80</span></b><span>per kg</span></div>
         </article>
         <article class="cut cursor-hover">
           <span class="cut__tag">Lamb</span>
           <h3 class="cut__name">Gigot Lamb Chops</h3>
           <p class="cut__desc">Thick-cut from the leg, sweet Perthshire lamb. Lovely on the grill with a touch of rosemary.</p>
-          <div class="cut__price"><b>£14<span class="pence">.50</span></b><span>per kg</span></div>
+          <div class="cut__price"><b>&pound;14<span class="pence">.50</span></b><span>per kg</span></div>
         </article>
         <article class="cut cursor-hover">
           <span class="cut__tag">Poultry</span>
           <h3 class="cut__name">Free-Range Whole Chicken</h3>
           <p class="cut__desc">Slow-grown Scottish birds with proper flavour. Spatchcocked or jointed free of charge.</p>
-          <div class="cut__price"><b>£8<span class="pence">.50</span></b><span>each</span></div>
+          <div class="cut__price"><b>&pound;8<span class="pence">.50</span></b><span>each</span></div>
         </article>
         <article class="cut cursor-hover">
           <span class="cut__tag">Award-Winning</span>
           <h3 class="cut__name">Steak &amp; Haggis Sausage</h3>
           <p class="cut__desc">Gold at the 2023 Scottish Craft Butchers awards. Beef, haggis and a hint of pepper.</p>
-          <div class="cut__price"><b>£7<span class="pence">.80</span></b><span>per kg</span></div>
+          <div class="cut__price"><b>&pound;7<span class="pence">.80</span></b><span>per kg</span></div>
         </article>
       </div>
 
-      <p class="counter__note reveal">Building a barbecue or a Sunday roast? Ask about our <em>made-up boxes</em> — we'll put a spread together to your budget.</p>
+      <p class="counter__note reveal">Building a barbecue or a Sunday roast? Ask about our <em>made-up boxes</em> &mdash; we'll put a spread together to your budget.</p>
     </div>
   </section>
 
@@ -931,7 +928,7 @@ body.locked{overflow:hidden;height:100vh;}
         <div class="about__body reveal">
           <p>Wattie Crawford opened the shop in 1948, fresh out of the army with a set of knives and a lease on a wee unit halfway up Duke Street. He sold to his neighbours, took his cuts seriously, and never once put anything on the counter he wouldn't feed his own family.</p>
           <p>Seventy-odd years on, his grandson Davie runs the block. The tiles are the same, the sawdust's long gone, but the standard hasn't shifted an inch. We still hang our beef on the bone, still buy whole carcasses from farms we've dealt with for decades in Ayrshire and Perthshire, and still link the morning's sausages by hand.</p>
-          <p class="about__sign">— Davie, third-generation butcher
+          <p class="about__sign">&mdash; Davie, third-generation butcher
             <small>At the block since 1991</small>
           </p>
         </div>
@@ -951,7 +948,7 @@ body.locked{overflow:hidden;height:100vh;}
     <div class="spotlight__inner reveal">
       <span class="eyebrow">The House Speciality</span>
       <h2>Aged on the Bone, <em>35 Days</em></h2>
-      <p>In the cold room at the back, prime Scotch hindquarters hang on the old steel rail — losing water, gaining flavour, the fat turning to butter. It's slower, it costs us more, and it's the reason folk cross the city for a steak from here.</p>
+      <p>In the cold room at the back, prime Scotch hindquarters hang on the old steel rail &mdash; losing water, gaining flavour, the fat turning to butter. It's slower, it costs us more, and it's the reason folk cross the city for a steak from here.</p>
       <a href="#order" class="btn btn--ghost cursor-hover">Reserve a Dry-Aged Cut</a>
     </div>
   </section>
@@ -983,27 +980,27 @@ body.locked{overflow:hidden;height:100vh;}
       <h2 class="section-title">What Glasgow <em>Says</em></h2>
       <div class="testi__stage" id="testiStage">
         <figure class="tslide active">
-          <div class="tslide__stars">★★★★★</div>
+          <div class="tslide__stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
           <blockquote class="tslide__text">&ldquo;Best square sausage in the east end, nae danger. My maw got her messages here, now I bring my ain weans. Some things ye don't mess wi'.&rdquo;</blockquote>
           <figcaption class="tslide__who"><b>Stephen M.</b><span>Dennistoun</span></figcaption>
         </figure>
         <figure class="tslide">
-          <div class="tslide__stars">★★★★★</div>
-          <blockquote class="tslide__text">&ldquo;The steak pie at Christmas is an institution in oor hoose. You order early or you'll no get one — and there's a reason for that.&rdquo;</blockquote>
+          <div class="tslide__stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+          <blockquote class="tslide__text">&ldquo;The steak pie at Christmas is an institution in oor hoose. You order early or you'll no get one &mdash; and there's a reason for that.&rdquo;</blockquote>
           <figcaption class="tslide__who"><b>Margaret D.</b><span>Carntyne</span></figcaption>
         </figure>
         <figure class="tslide">
-          <div class="tslide__stars">★★★★★</div>
+          <div class="tslide__stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
           <blockquote class="tslide__text">&ldquo;Asked Davie for something for a wee dinner party and he sorted me right oot, even talked me through cooking it. Proper butcher, proper advice.&rdquo;</blockquote>
           <figcaption class="tslide__who"><b>Priya K.</b><span>Haghill</span></figcaption>
         </figure>
         <figure class="tslide">
-          <div class="tslide__stars">★★★★★</div>
+          <div class="tslide__stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
           <blockquote class="tslide__text">&ldquo;That 28-day ribeye puts the supermarket tae shame. You can actually taste the difference. Worth every penny.&rdquo;</blockquote>
           <figcaption class="tslide__who"><b>Tam R.</b><span>Riddrie</span></figcaption>
         </figure>
         <figure class="tslide">
-          <div class="tslide__stars">★★★★★</div>
+          <div class="tslide__stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
           <blockquote class="tslide__text">&ldquo;Been coming since I was a wee boy haudin' my granda's haun. Same family, same quality. They don't make shops like this anymore.&rdquo;</blockquote>
           <figcaption class="tslide__who"><b>John C.</b><span>Dennistoun</span></figcaption>
         </figure>
@@ -1018,11 +1015,11 @@ body.locked{overflow:hidden;height:100vh;}
       <div class="order__aside">
         <span class="eyebrow reveal">Place an Order</span>
         <h2 class="section-title reveal">Reserve <em>Your Cut</em></h2>
-        <p class="lede reveal">Phone the shop or drop us a note below — for steak pies, dry-aged cuts, barbecue boxes or anything special. We'll have it cut, weighed and ready for collection.</p>
+        <p class="lede reveal">Phone the shop or drop us a note below &mdash; for steak pies, dry-aged cuts, barbecue boxes or anything special. We'll have it cut, weighed and ready for collection.</p>
         <div class="reveal">
           <div class="order__detail"><b>Call</b><div>0141 554 2091<small>Davie or the team, during shop hours</small></div></div>
           <div class="order__detail"><b>Find Us</b><div>312 Duke Street<small>Dennistoun, Glasgow, G31 1RW</small></div></div>
-          <div class="order__detail"><b>Hours</b><div>Tue–Fri 7–5.30<small>Sat 7–4 · Closed Sun &amp; Mon</small></div></div>
+          <div class="order__detail"><b>Hours</b><div>Tue&ndash;Fri 7&ndash;5.30<small>Sat 7&ndash;4 &middot; Closed Sun &amp; Mon</small></div></div>
         </div>
       </div>
 
@@ -1065,7 +1062,7 @@ body.locked{overflow:hidden;height:100vh;}
         </div>
         <button type="submit" class="btn btn--fill cursor-hover" id="submitBtn">Send to the Counter</button>
         <div class="form__success" id="formSuccess">
-          <b>Order received — cheers!</b>
+          <b>Order received &mdash; cheers!</b>
           <p>We'll give you a ring to confirm. This is a preview site, so nothing's actually been sent.</p>
         </div>
       </form>
@@ -1088,14 +1085,14 @@ body.locked{overflow:hidden;height:100vh;}
         <h3 class="reveal">312 Duke Street, <em style="font-style:italic;color:var(--green);">Dennistoun</em></h3>
         <p class="reveal">You'll spot the old green-and-gold frontage halfway up Duke Street, just past the Parade. Same spot since 1948.</p>
         <ul class="hours-list reveal">
-          <li><span>Tuesday – Friday</span><span>7.00 – 5.30</span></li>
-          <li><span>Saturday</span><span>7.00 – 4.00</span></li>
+          <li><span>Tuesday &ndash; Friday</span><span>7.00 &ndash; 5.30</span></li>
+          <li><span>Saturday</span><span>7.00 &ndash; 4.00</span></li>
           <li class="closed"><span>Sunday</span><span>Closed</span></li>
           <li class="closed"><span>Monday</span><span>Closed</span></li>
         </ul>
         <div class="transport reveal">
-          <span aria-hidden="true">🚆</span>
-          <div>Two minutes from <b>Bellgrove station</b>, a short walk up from Duke Street rail — right in the heart of Dennistoun's east-end mile. On-street parking outside the door.</div>
+          
+          <div>Two minutes from <b>Bellgrove station</b>, a short walk up from Duke Street rail &mdash; right in the heart of Dennistoun's east-end mile. On-street parking outside the door.</div>
         </div>
       </div>
     </div>
@@ -1113,15 +1110,15 @@ body.locked{overflow:hidden;height:100vh;}
     <div class="footer__cols">
       <div class="footer__col">
         <h4>Shop Hours</h4>
-        <p>Tue – Fri · 7.00 – 5.30</p>
-        <p>Saturday · 7.00 – 4.00</p>
-        <p>Sun &amp; Mon · Closed</p>
+        <p>Tue &ndash; Fri &middot; 7.00 &ndash; 5.30</p>
+        <p>Saturday &middot; 7.00 &ndash; 4.00</p>
+        <p>Sun &amp; Mon &middot; Closed</p>
       </div>
       <div class="footer__col">
         <h4>Find Us</h4>
         <p>312 Duke Street</p>
         <p>Dennistoun, Glasgow</p>
-        <p>G31 1RW · 0141 554 2091</p>
+        <p>G31 1RW &middot; 0141 554 2091</p>
       </div>
       <div class="footer__col">
         <h4>The Shop</h4>
@@ -1131,14 +1128,14 @@ body.locked{overflow:hidden;height:100vh;}
         <a href="#find">Find Us</a>
       </div>
     </div>
-    <div class="footer__copy">© 1948–2026 Butcher · Dennistoun, Glasgow · Crafted on Duke Street</div>
+    <div class="footer__copy">&copy; 1948&ndash;2026 Butcher &middot; Dennistoun, Glasgow &middot; Crafted on Duke Street</div>
   </footer>
 
 </div><!-- /#site -->
 
 <script>
 /* ============================================================
-   1. SPLASH → REVEAL  (smooth cinematic exit)
+   1. SPLASH -> REVEAL  (smooth cinematic exit)
    ============================================================ */
 (function(){
   const splash = document.getElementById('splash');
@@ -1185,11 +1182,11 @@ buildHeadline(document.getElementById('heroH1'), 'Real Meat,');
 buildHeadline(document.getElementById('heroH2'), 'Real Butchers.');
 
 /* ============================================================
-   3. MARQUEE — duplicate the track for a seamless infinite loop
+   3. MARQUEE &mdash; duplicate the track for a seamless infinite loop
    ============================================================ */
 (function(){
   const track = document.getElementById('marqueeTrack');
-  if(track) track.innerHTML += track.innerHTML;   // 2x content → -50% translate loops cleanly
+  if(track) track.innerHTML += track.innerHTML;   // 2x content -> -50% translate loops cleanly
 })();
 
 /* ============================================================
@@ -1247,7 +1244,7 @@ function runCountUp(scope){
 }
 
 /* ============================================================
-   7. NAV — scroll state, hamburger, mobile panel
+   7. NAV &mdash; scroll state, hamburger, mobile panel
    ============================================================ */
 (function(){
   const nav = document.getElementById('nav');
@@ -1335,14 +1332,14 @@ document.querySelectorAll('a[href^="#"]').forEach(link=>{
 })();
 
 /* ============================================================
-   11. SELECT — floating label "filled" state
+   11. SELECT &mdash; floating label "filled" state
    ============================================================ */
 document.querySelectorAll('.field select').forEach(sel=>{
   sel.addEventListener('change', ()=> sel.classList.toggle('filled', !!sel.value));
 });
 
 /* ============================================================
-   12. FORM submit (preview — no backend)
+   12. FORM submit (preview &mdash; no backend)
    ============================================================ */
 (function(){
   const form = document.getElementById('orderForm');
